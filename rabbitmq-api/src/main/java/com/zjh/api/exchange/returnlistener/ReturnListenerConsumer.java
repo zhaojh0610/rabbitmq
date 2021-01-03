@@ -1,4 +1,4 @@
-package com.zjh.api.exchange.fanout;
+package com.zjh.api.exchange.returnlistener;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -11,9 +11,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author zhaojh
  * @date 2021/1/3 19:03
- * @desc
+ * @desc topic.# 模糊匹配多个单词
  */
-public class ConsumerFanoutExchange {
+public class ReturnListenerConsumer {
 
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
@@ -22,15 +22,12 @@ public class ConsumerFanoutExchange {
         connectionFactory.setVirtualHost("/");
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();
-        String exchange = "test_fanout_exchange";
-        String exchangeType = "fanout";
-        String queueName = "test_fanout_queue";
-        String routingKey = "";
-        //  exchange声明
+        String exchange = "test_return_listener_exchange";
+        String exchangeType = "topic";
+        String queueName = "test_return_listener_queue";
+        String routingKey = "test.*";
         channel.exchangeDeclare(exchange, exchangeType, true, false, null);
-        //  queue声明
         channel.queueDeclare(queueName, false, false, false, null);
-        //  队列绑定
         channel.queueBind(queueName, exchange, routingKey);
         //  durable 是否持久化消息
         QueueingConsumer consumer = new QueueingConsumer(channel);
