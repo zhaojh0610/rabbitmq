@@ -1,4 +1,4 @@
-package com.zjh.api.exchange;
+package com.zjh.api.exchange.direct;
 
 import com.rabbitmq.client.*;
 
