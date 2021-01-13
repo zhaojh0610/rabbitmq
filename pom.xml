@@ -12,11 +12,12 @@
         <module>rabbitmq-api</module>
         <module>rabbit-producer</module>
         <module>rabbit-consumer</module>
+        <module>rabbit-parent</module>
     </modules>
 
     <parent>
-        <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.5.RELEASE</version>
     </parent>
 
