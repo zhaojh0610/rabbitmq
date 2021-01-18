@@ -1,0 +1,2 @@
+# auto configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.zjh.rabbit.producer.autoconfigure.RabbitProducerAutoConfiguration
