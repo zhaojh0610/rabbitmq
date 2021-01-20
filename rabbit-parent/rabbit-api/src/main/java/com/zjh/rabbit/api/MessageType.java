@@ -5,7 +5,6 @@ package com.zjh.rabbit.api;
  * @date 2021/1/16 23:41
  * @desc
  */
-
 public final class MessageType {
 
 
