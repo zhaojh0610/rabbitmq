@@ -33,7 +33,6 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
 
     private Map<String, RabbitTemplate> rabbitMap = Maps.newConcurrentMap();
 
-    @Autowired
     private Splitter splitter = Splitter.on("#");
 
     @Autowired

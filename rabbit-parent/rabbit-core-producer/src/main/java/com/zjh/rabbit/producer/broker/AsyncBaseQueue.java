@@ -21,20 +21,12 @@ public class AsyncBaseQueue {
             60L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(QUEUE_SIZE),
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r);
-                    thread.setName("rabbit_client_async_sender");
-                    return thread;
-                }
+            r -> {
+                Thread thread = new Thread(r);
+                thread.setName("rabbit_client_async_sender");
+                return thread;
             },
-            new RejectedExecutionHandler() {
-                @Override
-                public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                    log.error("async sender is error rejected, runnable: {}, executor: {}", r, executor);
-                }
-            });
+            (r, executor) -> log.error("async sender is error rejected, runnable: {}, executor: {}", r, executor));
 
     public static void submit(Runnable runnable) {
         senderAsync.submit(runnable);
