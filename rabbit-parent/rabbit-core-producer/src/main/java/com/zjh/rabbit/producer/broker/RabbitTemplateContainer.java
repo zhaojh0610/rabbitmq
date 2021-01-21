@@ -37,7 +37,7 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
 
     private Map<String, RabbitTemplate> rabbitMap = Maps.newConcurrentMap();
 
-    private JacksonSerializerFactory jack = JacksonSerializerFactory.INSTANCE;
+    private final JacksonSerializerFactory jack = JacksonSerializerFactory.INSTANCE;
 
     private Splitter splitter = Splitter.on("#");
 
