@@ -6,6 +6,10 @@ import com.google.common.collect.Maps;
 import com.zjh.rabbit.api.Message;
 import com.zjh.rabbit.api.MessageType;
 import com.zjh.rabbit.api.exception.MessageRuntimeException;
+import com.zjh.rabbit.common.convert.GenericMessageConverter;
+import com.zjh.rabbit.common.convert.RabbitMessageConverter;
+import com.zjh.rabbit.common.serializer.Serializer;
+import com.zjh.rabbit.common.serializer.impl.JacksonSerializerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -33,6 +37,8 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
 
     private Map<String, RabbitTemplate> rabbitMap = Maps.newConcurrentMap();
 
+    private JacksonSerializerFactory jack = JacksonSerializerFactory.INSTANCE;
+
     private Splitter splitter = Splitter.on("#");
 
     @Autowired
@@ -54,9 +60,11 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
         if (!MessageType.RAPID.equals(message.getMessageType())) {
             newTemplate.setConfirmCallback(this);
         }
-
         // 对于message的序列化方式
-        // newTemplate.setMessageConverter();
+        Serializer serializer = jack.create();
+        GenericMessageConverter gmc = new GenericMessageConverter(serializer);
+        RabbitMessageConverter rmc = new RabbitMessageConverter(gmc);
+        newTemplate.setMessageConverter(rmc);
         rabbitMap.putIfAbsent(topic, newTemplate);
         return rabbitMap.get(topic);
     }
