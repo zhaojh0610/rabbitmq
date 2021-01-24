@@ -6,10 +6,12 @@ import com.google.common.collect.Maps;
 import com.zjh.rabbit.api.Message;
 import com.zjh.rabbit.api.MessageType;
 import com.zjh.rabbit.api.exception.MessageRuntimeException;
+import com.zjh.rabbit.common.constant.BrokerMessageStatus;
 import com.zjh.rabbit.common.convert.GenericMessageConverter;
 import com.zjh.rabbit.common.convert.RabbitMessageConverter;
 import com.zjh.rabbit.common.serializer.Serializer;
 import com.zjh.rabbit.common.serializer.impl.JacksonSerializerFactory;
+import com.zjh.rabbit.producer.service.MessageStoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -19,6 +21,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +46,9 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
 
     @Autowired
     private ConnectionFactory connectionFactory;
+
+    @Autowired
+    private MessageStoreService messageStoreService;
 
     public RabbitTemplate getRabbitTemplate(Message message) throws MessageRuntimeException {
         Preconditions.checkNotNull(message);
@@ -79,6 +85,8 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
             sendTime = Long.parseLong(list.get(1));
         }
         if (ack) {
+            // 成功收到broker的ack为true时，更新消息为成功发送状态
+            messageStoreService.changeBrokerMessageStatus(messageId, BrokerMessageStatus.SEND_OK.getCode(), new Date());
             log.info("send message is ok, confirm messageId:{}, sendTime: {}", messageId, sendTime);
         } else {
             log.error("send message is fail, confirm messageId:{}, sendTime: {}", messageId, sendTime);
