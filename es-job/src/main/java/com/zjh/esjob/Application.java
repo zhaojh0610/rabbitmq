@@ -1,5 +1,6 @@
 package com.zjh.esjob;
 
+import com.zjh.rabbit.task.annotation.EnableElasticJob;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
