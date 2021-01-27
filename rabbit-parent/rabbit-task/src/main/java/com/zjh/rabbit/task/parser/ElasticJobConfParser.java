@@ -1,11 +1,23 @@
 package com.zjh.rabbit.task.parser;
 
+import com.dangdang.ddframe.job.config.JobCoreConfiguration;
+import com.dangdang.ddframe.job.config.JobTypeConfiguration;
+import com.dangdang.ddframe.job.config.dataflow.DataflowJobConfiguration;
+import com.dangdang.ddframe.job.config.script.ScriptJobConfiguration;
+import com.dangdang.ddframe.job.config.simple.SimpleJobConfiguration;
+import com.dangdang.ddframe.job.event.rdb.JobEventRdbConfiguration;
+import com.dangdang.ddframe.job.executor.handler.JobProperties;
+import com.dangdang.ddframe.job.lite.config.LiteJobConfiguration;
+import com.dangdang.ddframe.job.lite.spring.api.SpringJobScheduler;
 import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperRegistryCenter;
 import com.zjh.rabbit.task.annotation.ElasticJobConfig;
 import com.zjh.rabbit.task.autoconfigure.JobZookeeperProperties;
+import com.zjh.rabbit.task.enums.ElasticJobTypeEnum;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.util.StringUtils;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -69,6 +81,66 @@ public class ElasticJobConfParser implements ApplicationListener<ApplicationRead
                 int maxTimeDiffSeconds = conf.maxTimeDiffSeconds();
                 int reconcileIntervalMinutes = conf.reconcileIntervalMinutes();
 
+                //	先把当当网的esjob的相关configuration
+                JobCoreConfiguration coreConfig = JobCoreConfiguration
+                        .newBuilder(jobName, cron, shardingTotalCount)
+                        .shardingItemParameters(shardingItemParameters)
+                        .description(description)
+                        .failover(failover)
+                        .jobParameter(jobParameter)
+                        .misfire(misfire)
+                        .jobProperties(JobProperties.JobPropertiesEnum.JOB_EXCEPTION_HANDLER.getKey(), jobExceptionHandler)
+                        .jobProperties(JobProperties.JobPropertiesEnum.EXECUTOR_SERVICE_HANDLER.getKey(), executorServiceHandler)
+                        .build();
+
+                //	我到底要创建什么样的任务.
+                JobTypeConfiguration typeConfig = null;
+                if(ElasticJobTypeEnum.SIMPLE.getType().equals(jobTypeName)) {
+                    typeConfig = new SimpleJobConfiguration(coreConfig, jobClass);
+                }
+
+                if(ElasticJobTypeEnum.DATAFLOW.getType().equals(jobTypeName)) {
+                    typeConfig = new DataflowJobConfiguration(coreConfig, jobClass, streamingProcess);
+                }
+
+                if(ElasticJobTypeEnum.SCRIPT.getType().equals(jobTypeName)) {
+                    typeConfig = new ScriptJobConfiguration(coreConfig, scriptCommandLine);
+                }
+
+                // LiteJobConfiguration
+                LiteJobConfiguration jobConfig = LiteJobConfiguration
+                        .newBuilder(typeConfig)
+                        .overwrite(overwrite)
+                        .disabled(disabled)
+                        .monitorPort(monitorPort)
+                        .monitorExecution(monitorExecution)
+                        .maxTimeDiffSeconds(maxTimeDiffSeconds)
+                        .jobShardingStrategyClass(jobShardingStrategyClass)
+                        .reconcileIntervalMinutes(reconcileIntervalMinutes)
+                        .build();
+
+                // 	创建一个Spring的beanDefinition
+                BeanDefinitionBuilder factory = BeanDefinitionBuilder.rootBeanDefinition(SpringJobScheduler.class);
+                factory.setInitMethodName("init");
+                factory.setScope("prototype");
+
+                //	1.添加bean构造参数，相当于添加自己的真实的任务实现类
+                if (!ElasticJobTypeEnum.SCRIPT.getType().equals(jobTypeName)) {
+                    factory.addConstructorArgValue(confBean);
+                }
+                //	2.添加注册中心
+                factory.addConstructorArgValue(this.zookeeperRegistryCenter);
+                //	3.添加LiteJobConfiguration
+                factory.addConstructorArgValue(jobConfig);
+
+                //	4.如果有eventTraceRdbDataSource 则也进行添加
+                if (StringUtils.hasText(eventTraceRdbDataSource)) {
+                    BeanDefinitionBuilder rdbFactory = BeanDefinitionBuilder.rootBeanDefinition(JobEventRdbConfiguration.class);
+                    rdbFactory.addConstructorArgReference(eventTraceRdbDataSource);
+                    factory.addConstructorArgValue(rdbFactory.getBeanDefinition());
+                }
+
+                //  5.添加监听
 
             }
         } catch (ClassNotFoundException e) {
