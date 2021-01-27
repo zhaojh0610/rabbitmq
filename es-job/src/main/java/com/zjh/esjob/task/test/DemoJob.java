@@ -1,9 +1,9 @@
 package com.zjh.esjob.task.test;
 
-import org.springframework.stereotype.Component;
-
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
+import com.zjh.rabbit.task.annotation.ElasticJobConfig;
+import org.springframework.stereotype.Component;
 
 @Component
 @ElasticJobConfig(
