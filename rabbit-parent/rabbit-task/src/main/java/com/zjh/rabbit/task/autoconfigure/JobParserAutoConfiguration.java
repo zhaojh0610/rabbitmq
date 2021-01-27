@@ -2,6 +2,7 @@ package com.zjh.rabbit.task.autoconfigure;
 
 import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperConfiguration;
 import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperRegistryCenter;
+import com.zjh.rabbit.task.parser.ElasticJobConfParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,5 +34,11 @@ public class JobParserAutoConfiguration {
         log.info("初始化job注册中心配置成功，zkAddress:{},nameSpace:{}", jobZookeeperProperties.getServerLists(),
                 jobZookeeperProperties.getNamespace());
         return new ZookeeperRegistryCenter(zkConfig);
+    }
+
+    @Bean
+    public ElasticJobConfParser elasticJobConfParser(JobZookeeperProperties jobZookeeperProperties,
+                                                     ZookeeperRegistryCenter zookeeperRegistryCenter) {
+        return new ElasticJobConfParser(jobZookeeperProperties, zookeeperRegistryCenter);
     }
 }
