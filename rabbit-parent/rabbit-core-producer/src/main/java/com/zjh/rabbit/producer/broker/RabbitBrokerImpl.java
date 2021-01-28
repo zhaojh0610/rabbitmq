@@ -50,17 +50,20 @@ public class RabbitBrokerImpl implements RabbitBroker {
 
     @Override
     public void reliantSend(Message message) {
-        Date now = new Date();
-        message.setMessageType(MessageType.RELIANT);
-        BrokerMessage brokerMessage = new BrokerMessage();
-        brokerMessage.setMessageId(message.getMessageId());
-        brokerMessage.setStatus(BrokerMessageStatus.SEND_ING.getCode());
-        // tryCount在最开始发送的时候不需要进行设置
-        brokerMessage.setNextRetry(DateUtils.addMinutes(now, BrokerMessageConstant.TIMEOUT.getCode()));
-        brokerMessage.setCreateTime(now);
-        brokerMessage.setUpdateTime(now);
-        brokerMessage.setMessage(message);
-        messageStoreService.insert(brokerMessage);
+        BrokerMessage brokerMessage = messageStoreService.selectByMessageId(message.getMessageId());
+        if (brokerMessage == null) {
+            Date now = new Date();
+            brokerMessage = new BrokerMessage();
+            message.setMessageType(MessageType.RELIANT);
+            brokerMessage.setMessageId(message.getMessageId());
+            brokerMessage.setStatus(BrokerMessageStatus.SEND_ING.getCode());
+            // tryCount在最开始发送的时候不需要进行设置
+            brokerMessage.setNextRetry(DateUtils.addMinutes(now, BrokerMessageConstant.TIMEOUT.getCode()));
+            brokerMessage.setCreateTime(now);
+            brokerMessage.setUpdateTime(now);
+            brokerMessage.setMessage(message);
+            messageStoreService.insert(brokerMessage);
+        }
         sendKernel(message);
     }
 
@@ -76,9 +79,11 @@ public class RabbitBrokerImpl implements RabbitBroker {
      */
     private void sendKernel(Message message) {
         AsyncBaseQueue.submit((Runnable) () -> {
-            CorrelationData correlationData = new CorrelationData(String.format("%s#%s",
+            CorrelationData correlationData = new CorrelationData(String.format("%s#%s#%s",
                     message.getMessageId(),
-                    System.currentTimeMillis()));
+                    System.currentTimeMillis(),
+                    message.getMessageType())
+            );
             String routingKey = message.getRoutingKey();
             String topic = message.getTopic();
             RabbitTemplate rabbitTemplate = rabbitTemplateContainer.getRabbitTemplate(message);

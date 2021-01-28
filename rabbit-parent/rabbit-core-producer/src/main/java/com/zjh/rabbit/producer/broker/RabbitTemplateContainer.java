@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.zjh.rabbit.api.Message;
 import com.zjh.rabbit.api.MessageType;
 import com.zjh.rabbit.api.exception.MessageRuntimeException;
-import com.zjh.rabbit.common.constant.BrokerMessageStatus;
 import com.zjh.rabbit.common.convert.GenericMessageConverter;
 import com.zjh.rabbit.common.convert.RabbitMessageConverter;
 import com.zjh.rabbit.common.serializer.Serializer;
@@ -21,7 +20,6 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +48,9 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
     @Autowired
     private MessageStoreService messageStoreService;
 
+    @Autowired
+    private RabbitBroker rabbitBroker;
+
     public RabbitTemplate getRabbitTemplate(Message message) throws MessageRuntimeException {
         Preconditions.checkNotNull(message);
         String topic = message.getTopic();
@@ -75,18 +76,30 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
         return rabbitMap.get(topic);
     }
 
+    /**
+     * 无论是confirm消息，还是reliant消息，发送消息以后，broker都会去回调confirm方法
+     *
+     * @param correlationData
+     * @param ack
+     * @param cause
+     */
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String cause) {
         List<String> list = splitter.splitToList(correlationData.getId());
         String messageId = "";
         Long sendTime = null;
+        String messageType = "";
         if (!CollectionUtils.isEmpty(list)) {
             messageId = list.get(0);
             sendTime = Long.parseLong(list.get(1));
+            messageType = list.get(2);
         }
         if (ack) {
-            // 成功收到broker的ack为true时，更新消息为成功发送状态
-            messageStoreService.changeBrokerMessageStatus(messageId, BrokerMessageStatus.SEND_OK.getCode(), new Date());
+            // 如果消息类型为reliant 我们就去数据库查询并更新
+            if (MessageType.RELIANT.equals(messageType)) {
+                // 成功收到broker的ack为true时，更新消息为成功发送状态
+                messageStoreService.success(messageId);
+            }
             log.info("send message is ok, confirm messageId:{}, sendTime: {}", messageId, sendTime);
         } else {
             log.error("send message is fail, confirm messageId:{}, sendTime: {}", messageId, sendTime);
