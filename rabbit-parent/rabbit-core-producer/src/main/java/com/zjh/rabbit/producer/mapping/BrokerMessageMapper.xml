@@ -3,7 +3,7 @@
 <mapper namespace="com.bfxy.rabbit.producer.mapper.BrokerMessageMapper" >
   <resultMap id="BaseResultMap" type="com.zjh.rabbit.producer.entity.BrokerMessage" >
     <id column="message_id" property="messageId" jdbcType="VARCHAR" />
-    <result column="message" property="message" jdbcType="VARCHAR" typeHandler="com.bfxy.rabbit.common.mybatis.handler.MessageJsonTypeHandler" />
+    <result column="message" property="message" jdbcType="VARCHAR" typeHandler="com.zjh.rabbit.common.mybatis.handler.MessageJsonTypeHandler" />
     <result column="try_count" property="tryCount" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="VARCHAR" />
     <result column="next_retry" property="nextRetry" jdbcType="TIMESTAMP" />
