@@ -5,6 +5,9 @@ import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.zjh.rabbit.task.annotation.ElasticJobConfig;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author zhaojh
+ */
 @Component
 @ElasticJobConfig(
 			name = "com.bfxy.esjob.task.test.DemoJob",
