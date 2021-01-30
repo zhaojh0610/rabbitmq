@@ -6,6 +6,9 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @author zhaojh
+ */
 @Configuration
 @AutoConfigureAfter(RabbitProducerDataSourceConfiguration.class)
 public class RabbitProducerMybatisMapperScanerConfig {
@@ -14,7 +17,7 @@ public class RabbitProducerMybatisMapperScanerConfig {
     public MapperScannerConfigurer rabbitProducerMapperScannerConfigurer() {
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setSqlSessionFactoryBeanName("rabbitProducerSqlSessionFactory");
-        mapperScannerConfigurer.setBasePackage("com.bfxy.rabbit.producer.mapper");
+        mapperScannerConfigurer.setBasePackage("com.zjh.rabbit.producer.mapper");
         return mapperScannerConfigurer;
     }
 

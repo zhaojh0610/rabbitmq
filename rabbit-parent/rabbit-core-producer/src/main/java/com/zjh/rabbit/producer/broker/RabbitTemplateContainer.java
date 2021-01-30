@@ -48,9 +48,6 @@ public class RabbitTemplateContainer implements RabbitTemplate.ConfirmCallback {
     @Autowired
     private MessageStoreService messageStoreService;
 
-    @Autowired
-    private RabbitBroker rabbitBroker;
-
     public RabbitTemplate getRabbitTemplate(Message message) throws MessageRuntimeException {
         Preconditions.checkNotNull(message);
         String topic = message.getTopic();

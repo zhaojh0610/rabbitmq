@@ -13,6 +13,9 @@ import org.springframework.context.annotation.PropertySource;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
+/**
+ * @author zhaojh
+ */
 @Configuration
 @PropertySource({"classpath:rabbit-producer-message.properties"})
 public class RabbitProducerDataSourceConfiguration {

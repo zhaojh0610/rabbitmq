@@ -1,16 +1,17 @@
-package com.zjh.rabbit.producer;
+package com.zjh.rabbit;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * $Application
+ * application  启动类
  *
  * @author zhaojh
- * @date 2021/1/21 9:58
+ * @date 2021/1/28 17:57
  */
 @SpringBootApplication
 public class Application {
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
     }

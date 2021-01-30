@@ -11,7 +11,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
@@ -22,7 +22,7 @@ import java.util.Date;
  * @date 2021/1/20 20:54
  */
 @Slf4j
-@Component
+@Service
 public class RabbitBrokerImpl implements RabbitBroker {
 
     @Autowired

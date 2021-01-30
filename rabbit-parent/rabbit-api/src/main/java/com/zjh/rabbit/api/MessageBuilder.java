@@ -1,8 +1,6 @@
 package com.zjh.rabbit.api;
 
 import com.zjh.rabbit.api.exception.MessageRuntimeException;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -14,8 +12,6 @@ import java.util.UUID;
  * @date 2021/1/17 15:08
  * @desc MessageBuilder：建造者模型
  */
-@Builder
-@AllArgsConstructor
 public class MessageBuilder {
 
     private String messageId;
@@ -33,7 +29,7 @@ public class MessageBuilder {
     private MessageBuilder() {
     }
 
-    public MessageBuilder create() {
+    public static MessageBuilder create() {
         return new MessageBuilder();
     }
 
@@ -64,6 +60,11 @@ public class MessageBuilder {
 
     public MessageBuilder withDelayMills(Integer delayMills) {
         this.delayMills = delayMills;
+        return this;
+    }
+
+    public MessageBuilder withMessageType(String messageType) {
+        this.messageType = messageType;
         return this;
     }
 

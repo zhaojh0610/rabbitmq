@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.List;
 
 
+/**
+ * @author zhaojh
+ */
 @Mapper
 public interface BrokerMessageMapper {
 	
@@ -20,8 +23,6 @@ public interface BrokerMessageMapper {
     BrokerMessage selectByPrimaryKey(String messageId);
 
     int updateByPrimaryKeySelective(BrokerMessage record);
-
-    int updateByPrimaryKeyWithBLOBs(BrokerMessage record);
 
     int updateByPrimaryKey(BrokerMessage record);
 	
